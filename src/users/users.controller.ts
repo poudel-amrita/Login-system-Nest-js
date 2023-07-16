@@ -18,9 +18,9 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { UserEntity } from './entities/user.entity';
-import { LocalAuthGuard } from 'src/auth/local-auth.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-
+import { RoleGuard } from 'src/auth/roles.guard';
+import { Role } from 'src/auth/role.decorator';
 @Controller('users')
 @ApiTags('users')
 export class UsersController {
@@ -33,21 +33,16 @@ export class UsersController {
   }
 
   @Get('/all')
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Role('USER')
   @ApiBearerAuth()
+  @ApiOkResponse({ type: UserEntity })
   findAll() {
     return this.usersService.findAll();
   }
-
-  @Get('/profile')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  getProfile() {
-    return this.usersService.findAll();
-  }
-
+  
   @Get(':id')
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity })
   findOne(@Param('id') id: string) {
@@ -55,7 +50,7 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity })
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
@@ -63,7 +58,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserEntity })
   remove(@Param('id') id: string) {

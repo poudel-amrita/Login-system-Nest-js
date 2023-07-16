@@ -10,7 +10,7 @@ export class UsersService {
 
   // to create a new User
   async create(createUserDto: CreateUserDto) {
-    const { username, email, password } = createUserDto;
+    const { username, email, password, status, role } = createUserDto;
 
     const hashedPassword = hashPassword(password);
     return this.prisma.user.create({
@@ -18,6 +18,8 @@ export class UsersService {
         email,
         username,
         password: hashedPassword,
+        status,
+        role,
       },
     });
   }
@@ -32,12 +34,11 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { id: id } });
   }
 
-  //to find authenticated user
-  getProfile() {
-    return this.prisma.user;
-  }
   // to update User
   async update(id: number, updateUserDto: UpdateUserDto) {
+    if (updateUserDto.password) {
+      updateUserDto.password = hashPassword(updateUserDto.password);
+    }
     return this.prisma.user.update({
       where: { id },
       data: updateUserDto,
